@@ -4,6 +4,7 @@ const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./src/config/swagger");
 const connectDB = require("./src/config/connection");
+const bcrypt = require("bcrypt");
 
 const authRoutes = require("./src/routes/auth");
 const userRoutes = require("./src/routes/users");
@@ -11,6 +12,7 @@ const categoryRoutes = require("./src/routes/categories");
 const testRoutes = require("./src/routes/tests");
 const attemptRoutes = require("./src/routes/attempts");
 const lab1Routes = require("./src/routes/lab1");
+const geoRoutes = require("./src/routes/geo");
 
 const app = express();
 
@@ -41,6 +43,24 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/attempts", attemptRoutes);
 app.use("/api/queries", lab1Routes);
+app.use("/api/geo", geoRoutes);
+
+app.use("/api/temp", async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password || typeof password !== "string") {
+      return res.status(400).json({ error: "Password is required" });
+    }
+
+    const saltRounds = 12;
+    const hash = await bcrypt.hash(password, saltRounds);
+
+    res.json({ hash });
+  } catch (err) {
+    res.status(500).json({ error: "Internal error" });
+  }
+});
 
 app.use((req, res) => res.status(404).json({ message: "Route not found" }));
 

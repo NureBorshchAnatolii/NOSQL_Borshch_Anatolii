@@ -14,7 +14,6 @@ const { protect } = require("../middleware/auth");
  * @swagger
  * /api/attempts:
  *   get:
- *     summary: List attempts (own attempts; all if admin)
  *     tags: [Attempts]
  *     parameters:
  *       - in: query
@@ -52,7 +51,6 @@ router.get("/", protect, async (req, res) => {
  * @swagger
  * /api/attempts/{id}:
  *   get:
- *     summary: Get a single attempt (owner or admin)
  *     tags: [Attempts]
  *     parameters:
  *       - in: path
@@ -95,7 +93,6 @@ router.get("/:id", protect, async (req, res) => {
  * @swagger
  * /api/attempts/start:
  *   post:
- *     summary: Start a new test attempt
  *     tags: [Attempts]
  *     requestBody:
  *       required: true
@@ -110,7 +107,6 @@ router.get("/:id", protect, async (req, res) => {
  *                 example: 664a1f2e8b1c2d3e4f5a6b7c
  *     responses:
  *       201:
- *         description: Attempt created + test questions (correct answers hidden)
  *         content:
  *           application/json:
  *             schema:
@@ -159,7 +155,6 @@ router.post("/start", protect, async (req, res) => {
  * @swagger
  * /api/attempts/{id}/answer:
  *   post:
- *     summary: Submit an answer for a question in an attempt
  *     tags: [Attempts]
  *     parameters:
  *       - in: path
@@ -185,7 +180,6 @@ router.post("/start", protect, async (req, res) => {
  *                 description: For text questions
  *     responses:
  *       200:
- *         description: Answer recorded
  *         content:
  *           application/json:
  *             schema:
@@ -246,7 +240,6 @@ router.post("/:id/answer", protect, async (req, res) => {
  * @swagger
  * /api/attempts/{id}/finish:
  *   post:
- *     summary: Finish an attempt and calculate the score
  *     tags: [Attempts]
  *     parameters:
  *       - in: path
@@ -256,7 +249,6 @@ router.post("/:id/answer", protect, async (req, res) => {
  *           type: string
  *     responses:
  *       200:
- *         description: Attempt result with score and pass/fail
  *         content:
  *           application/json:
  *             schema:
@@ -312,7 +304,6 @@ router.post("/:id/finish", protect, async (req, res) => {
  * @swagger
  * /api/attempts/{id}:
  *   delete:
- *     summary: Delete an attempt (admin only)
  *     tags: [Attempts]
  *     parameters:
  *       - in: path

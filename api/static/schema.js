@@ -21,6 +21,20 @@ db.createCollection("users", {
         },
         createdAt: { bsonType: "date" },
         updatedAt: { bsonType: "date" },
+        location: {
+          bsonType: "object",
+          properties: {
+            type: { bsonType: "string", enum: ["Point"] },
+            coordinates: {
+              bsonType: "array",
+              minItems: 2,
+              maxItems: 2,
+              items: { bsonType: "double" },
+            },
+            city: { bsonType: ["string", "null"] },
+            country: { bsonType: ["string", "null"] },
+          },
+        },
       },
       additionalProperties: false,
     },

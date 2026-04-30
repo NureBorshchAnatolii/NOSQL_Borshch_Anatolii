@@ -13,7 +13,6 @@ const { protect, adminOnly } = require("../middleware/auth");
  * @swagger
  * /api/categories:
  *   get:
- *     summary: List all categories
  *     tags: [Categories]
  *     responses:
  *       200:
@@ -38,7 +37,6 @@ router.get("/", protect, async (req, res) => {
  * @swagger
  * /api/categories/{id}:
  *   get:
- *     summary: Get a single category
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -71,7 +69,6 @@ router.get("/:id", protect, async (req, res) => {
  * @swagger
  * /api/categories:
  *   post:
- *     summary: Create a category (admin only)
  *     tags: [Categories]
  *     requestBody:
  *       required: true
@@ -104,7 +101,6 @@ router.post("/", protect, adminOnly, async (req, res) => {
  * @swagger
  * /api/categories/{id}:
  *   put:
- *     summary: Update a category (admin only)
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -147,7 +143,6 @@ router.put("/:id", protect, adminOnly, async (req, res) => {
  * @swagger
  * /api/categories/{id}:
  *   delete:
- *     summary: Delete a category (admin only)
  *     tags: [Categories]
  *     parameters:
  *       - in: path

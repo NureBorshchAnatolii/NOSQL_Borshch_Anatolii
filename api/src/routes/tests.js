@@ -13,7 +13,6 @@ const { protect, adminOnly } = require('../middleware/auth');
  * @swagger
  * /api/tests:
  *   get:
- *     summary: List all tests
  *     tags: [Tests]
  *     parameters:
  *       - in: query
@@ -28,7 +27,6 @@ const { protect, adminOnly } = require('../middleware/auth');
  *         description: Filter by creator
  *     responses:
  *       200:
- *         description: Array of tests (correct answers hidden)
  *         content:
  *           application/json:
  *             schema:
@@ -58,7 +56,6 @@ router.get('/', protect, async (req, res) => {
  * @swagger
  * /api/tests/{id}:
  *   get:
- *     summary: Get a single test
  *     tags: [Tests]
  *     parameters:
  *       - in: path
@@ -68,7 +65,6 @@ router.get('/', protect, async (req, res) => {
  *           type: string
  *     responses:
  *       200:
- *         description: Test object. Correct answers hidden unless admin or owner.
  *         content:
  *           application/json:
  *             schema:
@@ -106,7 +102,6 @@ router.get('/:id', protect, async (req, res) => {
  * @swagger
  * /api/tests:
  *   post:
- *     summary: Create a new test
  *     tags: [Tests]
  *     requestBody:
  *       required: true
@@ -145,7 +140,6 @@ router.post('/', protect, async (req, res) => {
  * @swagger
  * /api/tests/{id}:
  *   put:
- *     summary: Update a test (owner or admin)
  *     tags: [Tests]
  *     parameters:
  *       - in: path
@@ -193,7 +187,6 @@ router.put('/:id', protect, async (req, res) => {
  * @swagger
  * /api/tests/{id}:
  *   delete:
- *     summary: Delete a test (owner or admin)
  *     tags: [Tests]
  *     parameters:
  *       - in: path
@@ -215,23 +208,25 @@ router.delete('/:id', protect, async (req, res) => {
     if (!test) return res.status(404).json({ message: 'Test not found' });
 
     const isOwnerOrAdmin =
-      req.user.role === 'admin' || test.userId.toString() === req.user._id.toString();
-    if (!isOwnerOrAdmin) return res.status(403).json({ message: 'Forbidden' });
+      req.user.role === 'admin' ||
+      test.userId.toString() === req.user._id.toString();
+
+    if (!isOwnerOrAdmin) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
 
     await test.deleteOne();
+
     res.json({ message: 'Test deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ─── Question sub-routes ──────────────────────────────────────────────────────
-
 /**
  * @swagger
  * /api/tests/{id}/questions:
  *   post:
- *     summary: Add a question to a test (owner or admin)
  *     tags: [Tests]
  *     parameters:
  *       - in: path
@@ -247,7 +242,6 @@ router.delete('/:id', protect, async (req, res) => {
  *             $ref: '#/components/schemas/QuestionInput'
  *     responses:
  *       201:
- *         description: Created question
  *         content:
  *           application/json:
  *             schema:
@@ -278,7 +272,6 @@ router.post('/:id/questions', protect, async (req, res) => {
  * @swagger
  * /api/tests/{id}/questions/{qId}:
  *   put:
- *     summary: Update a question (owner or admin)
  *     tags: [Tests]
  *     parameters:
  *       - in: path
@@ -333,7 +326,6 @@ router.put('/:id/questions/:qId', protect, async (req, res) => {
  * @swagger
  * /api/tests/{id}/questions/{qId}:
  *   delete:
- *     summary: Delete a question (owner or admin)
  *     tags: [Tests]
  *     parameters:
  *       - in: path

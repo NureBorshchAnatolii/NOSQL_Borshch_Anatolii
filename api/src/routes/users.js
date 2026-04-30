@@ -13,7 +13,6 @@ const { protect, adminOnly } = require("../middleware/auth");
  * @swagger
  * /api/users:
  *   get:
- *     summary: List all users (admin only)
  *     tags: [Users]
  *     responses:
  *       200:
@@ -40,7 +39,6 @@ router.get("/", protect, adminOnly, async (req, res) => {
  * @swagger
  * /api/users/{id}:
  *   get:
- *     summary: Get a user by ID (self or admin)
  *     tags: [Users]
  *     parameters:
  *       - in: path
@@ -78,7 +76,6 @@ router.get("/:id", protect, async (req, res) => {
  * @swagger
  * /api/users/{id}:
  *   put:
- *     summary: Update a user profile (self or admin)
  *     tags: [Users]
  *     parameters:
  *       - in: path
@@ -106,7 +103,6 @@ router.get("/:id", protect, async (req, res) => {
  *                 description: Admin only field
  *     responses:
  *       200:
- *         description: Updated user
  *         content:
  *           application/json:
  *             schema:
@@ -141,7 +137,6 @@ router.put("/:id", protect, async (req, res) => {
  * @swagger
  * /api/users/{id}:
  *   delete:
- *     summary: Delete a user (admin only)
  *     tags: [Users]
  *     parameters:
  *       - in: path
@@ -159,8 +154,10 @@ router.put("/:id", protect, async (req, res) => {
  */
 router.delete("/:id", protect, adminOnly, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    await user.deleteOne();
     res.json({ message: "User deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });

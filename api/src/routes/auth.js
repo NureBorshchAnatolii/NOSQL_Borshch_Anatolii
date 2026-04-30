@@ -46,8 +46,7 @@ router.post(
   [
     body('firstName').notEmpty().withMessage('First name is required'),
     body('lastName').notEmpty().withMessage('Last name is required'),
-    body('email').isEmail().withMessage('Valid email is required'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('email').isEmail().withMessage('Valid email is required')
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -79,7 +78,6 @@ router.post(
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Login with email and password
  *     tags: [Auth]
  *     security: []
  *     requestBody:
@@ -90,13 +88,11 @@ router.post(
  *             $ref: '#/components/schemas/LoginBody'
  *     responses:
  *       200:
- *         description: Successful login, returns JWT + user object
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       401:
- *         description: Invalid credentials
  *         content:
  *           application/json:
  *             schema:
@@ -131,7 +127,6 @@ router.post(
  * @swagger
  * /api/auth/me:
  *   get:
- *     summary: Get the currently authenticated user
  *     tags: [Auth]
  *     responses:
  *       200:

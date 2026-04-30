@@ -35,8 +35,22 @@ const testSchema = new mongoose.Schema(
     description: { type: String, default: "" },
     passingScore: { type: Number, required: true, min: 0, max: 100 },
     questions: [questionSchema],
+    isDeleted: { type: Boolean, default: false }
   },
   { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } },
 );
+
+testSchema.pre(/^find/, function(next) {
+  this.where({ isDeleted: false });
+});
+
+testSchema.pre('aggregate', function(next) {
+  this.pipeline().unshift({ $match: { isDeleted: false } });
+});
+
+testSchema.pre('deleteOne', { document: true, query: false }, async function () {
+  await this.updateOne({ $set: { isDeleted: true } });
+  throw new Error("Soft delete: prevent physical removal");
+});
 
 module.exports = mongoose.model("Test", testSchema);

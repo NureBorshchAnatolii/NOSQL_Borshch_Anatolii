@@ -4,22 +4,20 @@
  *   name: Queries
  */
 
-const express = require('express');
-const router  = express.Router();
-const mongoose = require('mongoose');
-const User        = require('../models/User');
-const TestAttempt = require('../models/TestAttempt');
-const { protect, adminOnly } = require('../middleware/auth');
+const express = require("express");
+const router = express.Router();
+const mongoose = require("mongoose");
+const User = require("../models/User");
+const TestAttempt = require("../models/TestAttempt");
+const { protect, adminOnly } = require("../middleware/auth");
 
 /**
  * @swagger
  * /api/queries/users-no-attempts:
  *   get:
- *     summary: "1.2.1 — Users who have never made any test attempt"
  *     tags: [Queries]
  *     responses:
  *       200:
- *         description: List of users with zero attempts
  *         content:
  *           application/json:
  *             schema:
@@ -30,15 +28,15 @@ const { protect, adminOnly } = require('../middleware/auth');
  *                   type: array
  *                   items: { $ref: '#/components/schemas/User' }
  */
-router.get('/users-no-attempts', protect, adminOnly, async (req, res) => {
+router.get("/users-no-attempts", protect, adminOnly, async (req, res) => {
   try {
     const data = await User.aggregate([
       {
         $lookup: {
-          from:         'testattempts',
-          localField:   '_id',
-          foreignField: 'userId',
-          as:           'attempts',
+          from: "testAttempts",
+          localField: "_id",
+          foreignField: "userId",
+          as: "attempts",
         },
       },
       {
@@ -59,7 +57,6 @@ router.get('/users-no-attempts', protect, adminOnly, async (req, res) => {
  * @swagger
  * /api/queries/users-by-name:
  *   get:
- *     summary: "1.2.2 — Search users by first name or last name"
  *     tags: [Queries]
  *     parameters:
  *       - in: query
@@ -84,19 +81,22 @@ router.get('/users-no-attempts', protect, adminOnly, async (req, res) => {
  *       400:
  *         description: Missing query parameter
  */
-router.get('/users-by-name', protect, async (req, res) => {
+router.get("/users-by-name", protect, async (req, res) => {
   try {
     const { name } = req.query;
-    if (!name) return res.status(400).json({ message: 'Query param ?name= is required' });
+    if (!name)
+      return res
+        .status(400)
+        .json({ message: "Query param ?name= is required" });
 
     const data = await User.find(
       {
         $or: [
-          { firstName: { $regex: name, $options: 'i' } },
-          { lastName:  { $regex: name, $options: 'i' } },
+          { firstName: { $regex: name, $options: "i" } },
+          { lastName: { $regex: name, $options: "i" } },
         ],
       },
-      { passwordHash: 0 }
+      { passwordHash: 0 },
     ).sort({ lastName: 1, firstName: 1 });
 
     res.json({ query: name, count: data.length, data });
@@ -109,7 +109,6 @@ router.get('/users-by-name', protect, async (req, res) => {
  * @swagger
  * /api/queries/attempts-by-score:
  *   get:
- *     summary: "1.2.3 — Latest completed attempts with score >= minScore"
  *     tags: [Queries]
  *     parameters:
  *       - in: query
@@ -137,21 +136,19 @@ router.get('/users-by-name', protect, async (req, res) => {
  *                   type: array
  *                   items: { $ref: '#/components/schemas/TestAttempt' }
  */
-router.get('/attempts-by-score', protect, async (req, res) => {
+router.get("/attempts-by-score", protect, async (req, res) => {
   try {
     const minScore = Number(req.query.minScore ?? 80);
-    const limit    = Number(req.query.limit    ?? 5);
+    const limit = Number(req.query.limit ?? 5);
 
-    const data = await TestAttempt.find(
-      {
-        status: 'completed',
-        score:  { $gte: minScore },
-      }
-    )
+    const data = await TestAttempt.find({
+      status: "completed",
+      score: { $gte: minScore },
+    })
       .sort({ finishedAt: -1 })
       .limit(limit)
-      .populate('userId', 'firstName lastName email')
-      .populate('testId', 'title passingScore');
+      .populate("userId", "firstName lastName email")
+      .populate("testId", "title passingScore");
 
     res.json({ minScore, count: data.length, data });
   } catch (err) {
@@ -163,7 +160,6 @@ router.get('/attempts-by-score', protect, async (req, res) => {
  * @swagger
  * /api/queries/abandon-attempts:
  *   patch:
- *     summary: "1.2.4 — Abandon all in-progress attempts started before a cutoff date"
  *     tags: [Queries]
  *     requestBody:
  *       required: true
@@ -192,30 +188,36 @@ router.get('/attempts-by-score', protect, async (req, res) => {
  *       400:
  *         description: Missing or invalid cutoffDate
  */
-router.patch('/abandon-attempts', protect, adminOnly, async (req, res) => {
+router.patch("/abandon-attempts", protect, adminOnly, async (req, res) => {
   try {
     const { cutoffDate } = req.body;
-    if (!cutoffDate) return res.status(400).json({ message: 'Body field cutoffDate is required' });
+    if (!cutoffDate)
+      return res
+        .status(400)
+        .json({ message: "Body field cutoffDate is required" });
 
     const cutoff = new Date(cutoffDate);
-    if (isNaN(cutoff.getTime())) return res.status(400).json({ message: 'cutoffDate is not a valid date' });
+    if (isNaN(cutoff.getTime()))
+      return res
+        .status(400)
+        .json({ message: "cutoffDate is not a valid date" });
 
     const result = await TestAttempt.updateMany(
       {
-        status:    'in-progress',
+        status: "in-progress",
         startedAt: { $lt: cutoff },
       },
       {
         $set: {
-          status:     'abandoned',
+          status: "abandoned",
           finishedAt: cutoff,
         },
-      }
+      },
     );
 
     res.json({
       cutoffDate: cutoff.toISOString(),
-      matched:   result.matchedCount,
+      matched: result.matchedCount,
       abandoned: result.modifiedCount,
     });
   } catch (err) {
